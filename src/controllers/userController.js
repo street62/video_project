@@ -128,20 +128,54 @@ export const getEdit = (req, res) => {
   return res.render('edit-profile', {pageTitle: "Edit Profile", user});
 }
 export const postEdit = async (req, res) => {
-  const user = req.session.user;
-  const {name, username, location} = req.body;
+  // const user = req.session.user;
+  // const {name, username, location} = req.body;
+  const {
+    body: {name, username, location},
+    session: {user},
+    file,
+  } = req;
   if (user.username !== username) {
     if (await User.exists({username})) {
       return res.status(400).render('edit-profile', {pageTitle: "Edit Profile", errorMessage: "This username already exists. Try another one.", user})
     }
   }
   const updatedUser = await User.findByIdAndUpdate(user._id, {
+    avatarUrl: file ? file.path : user.avatarUrl,
     name,
     username,
     location,
   }, {new: true});
   req.session.user = updatedUser;
   return res.redirect('/');
+}
+
+export const getChangePassword = (req, res) => {
+  res.render("change-password", {pageTitle: "Change Password"})
+}
+export const postChangePassword = async (req, res) => {
+  // send notification
+  const {
+    body: {currentPassword, newPassword, newPasswordConfirm},
+    session: {
+      user: {_id, password}
+    }
+  } = req
+  const passwordMatched = await bcrypt.compare(currentPassword, password);
+  if (!passwordMatched) {
+    return res.status(400).render('change-password', {pageTitle: "Change Password", errorMessage: "Please check the current password."}) 
+  }
+  if (newPassword !== newPasswordConfirm) {
+    return res.status(400).render('change-password', {pageTitle: "Change Password", errorMessage: "Password confirmation does not match."}) 
+  }
+
+  const user = await User.findOne({_id})
+  user.password = newPassword
+  console.log("password input: ", user.password)
+  await user.save()
+  console.log("hashed password: ", user.password)
+  return res.redirect("/logout")
+
 }
 export const remove = (req, res) => res.send("Remove User")
 export const see = (req, res) => res.send("See user")

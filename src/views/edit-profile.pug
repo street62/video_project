@@ -1,0 +1,11 @@
+extends base
+
+block content
+  if errorMessage
+    span=errorMessage 
+  form(method="POST")
+    input(name="name", placeholder="Name", type="text", required, value=user.name)
+    input(name="email", placeholder="Email", type="email", required, value=user.email, disabled)
+    input(name="username", placeholder="Username", type="text", required, value=user.username)
+    input(name="location", placeholder="Location", type="text", required, value=user.location)
+    input(type="submit", value="Edit")

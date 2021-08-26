@@ -1,0 +1,6 @@
+mixin videos(video)
+  h4
+    a(href=`/videos/${video.id}`)=video.title
+  p=video.description
+  small=video.createdAt
+  hr

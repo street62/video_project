@@ -130,7 +130,7 @@ export const getEdit = (req, res) => {
 export const postEdit = async (req, res) => {
   const user = req.session.user;
   const {name, username, location} = req.body;
-  if (user.username != username) {
+  if (user.username !== username) {
     if (await User.exists({username})) {
       return res.status(400).render('edit-profile', {pageTitle: "Edit Profile", errorMessage: "This username already exists. Try another one.", user})
     }

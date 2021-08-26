@@ -82,13 +82,11 @@ export const finishGithubLogin = async (req, res) => {
         Authorization: `token ${access_token}`
       }
     })).json();
-    console.log(userData);
     const emailData = await (await fetch(`${REQUEST_URL}/user/emails`, {
       headers: {
         Authorization: `token ${access_token}`
       }
     })).json();
-    console.log(emailData);
     const emailObj = emailData.find(
       (email) => email.primary === true && email.verified === true
     );
@@ -132,6 +130,11 @@ export const getEdit = (req, res) => {
 export const postEdit = async (req, res) => {
   const user = req.session.user;
   const {name, username, location} = req.body;
+  if (user.username != username) {
+    if (await User.exists({username})) {
+      return res.status(400).render('edit-profile', {pageTitle: "Edit Profile", errorMessage: "This username already exists. Try another one.", user})
+    }
+  }
   const updatedUser = await User.findByIdAndUpdate(user._id, {
     name,
     username,
